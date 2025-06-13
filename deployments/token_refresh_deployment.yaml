@@ -1,0 +1,6 @@
+name: token-refresh-deployment
+  flow_name: token-refresh-pipeline
+  entrypoint: flows/pipeline_flow.py:token_refresh_pipeline
+  schedules:
+    - interval:
+        seconds: 21600  # 6 hours

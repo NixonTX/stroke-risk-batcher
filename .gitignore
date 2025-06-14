@@ -3,3 +3,4 @@
 *.txt
 
 *.pyc
+validate_yaml.py

@@ -17,8 +17,7 @@ pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NixonTX/stroke-risk-batcher.git
     branch: main
-    access_token: '{{ prefect.blocks.secret.deployment-token-refresh-deployment-token-refresh-pipeline-repo-token
-      }}'
+    access_token: '{{ prefect.blocks.secret.deployment-token-refresh-deployment-token-refresh-pipeline-repo-token }}'
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:

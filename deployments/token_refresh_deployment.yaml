@@ -4,6 +4,28 @@ entrypoint: flows/pipeline_flow.py:token_refresh_pipeline
 work_pool:
   name: local-process-pool
 schedules:
-  - interval:
-      seconds: 21600  # 6 hours
+- interval:
+    seconds: 21600    # 6 hours
+  active: true
+deployments:
+- name: token-refresh-deployment
+  version:
+  tags: []
+  description:
+  entrypoint: flows\pipeline_flow.py:token_refresh_pipeline
+  parameters: {}
+  work_pool:
+    name: local-process-pool
+    work_queue_name:
+    job_variables: {}
+  schedules:
+  - interval: 21600.0
+    anchor_date: '2025-06-14T13:06:11.420668+00:00'
+    timezone: UTC
     active: true
+  pull:
+  - prefect.deployments.steps.git_clone:
+      repository: https://github.com/NixonTX/stroke-risk-batcher.git
+      branch: main
+      access_token: '{{ prefect.blocks.secret.deployment-token-refresh-deployment-token-refresh-pipeline-repo-token
+        }}'

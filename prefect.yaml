@@ -7,32 +7,67 @@ name: stroke-risk-batcher
 prefect-version: 2.20.19
 
 # build section allows you to manage and build docker images
-build: null
+build:
 
 # push section allows you to manage if and how this project is uploaded to remote locations
-push: null
+push:
 
 # pull section allows you to provide instructions for cloning this project in remote locations
 pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NixonTX/stroke-risk-batcher.git
     branch: main
-    access_token: '{{ prefect.blocks.secret.deployment-token-refresh-deployment-token-refresh-pipeline-repo-token }}'
+    access_token: '{{ prefect.blocks.secret.deployment-token-refresh-deployment-token-refresh-pipeline-repo-token
+      }}'
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
 - name: token-refresh-deployment
-  version: null
+  version:
   tags: []
-  description: null
+  description:
   entrypoint: flows\pipeline_flow.py:token_refresh_pipeline
   parameters: {}
   work_pool:
     name: local-process-pool
-    work_queue_name: null
+    work_queue_name:
     job_variables: {}
   schedules:
   - interval: 21600.0
     anchor_date: '2025-06-13T12:37:58.461480+00:00'
     timezone: UTC
+    active: true
+- name: stroke-risk-deployment
+  version:
+  tags: []
+  description:
+  entrypoint: flows/pipeline_flow.py:stroke_risk_pipeline
+  parameters: {}
+  work_pool:
+    name: local-process-pool
+    work_queue_name:
+    job_variables: {}
+  schedules:
+  - cron: '*/15 * * * *'
+    timezone:
+    day_or: true
+    active: true
+- name: token-refresh-deployment
+  version:
+  tags: []
+  description:
+  entrypoint: flows/pipeline_flow.py:token_refresh_pipeline
+  parameters: {}
+  work_pool:
+    name: local-process-pool
+    work_queue_name:
+    job_variables: {}
+  schedules:
+  - interval: 21600.0
+    anchor_date: '2025-06-13T12:37:58.461480+00:00'
+    timezone: UTC
+    active: true
+  - cron: 0 */6 * * *
+    timezone:
+    day_or: true
     active: true

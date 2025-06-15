@@ -4,6 +4,28 @@ entrypoint: flows/pipeline_flow.py:stroke_risk_pipeline
 work_pool:
   name: local-process-pool
 schedules:
-  - interval:
-      seconds: 900  # 15 minutes
+- interval:
+    seconds: 900    # 15 minutes
+  active: true
+deployments:
+- name: stroke-risk-deployment
+  version:
+  tags: []
+  description:
+  entrypoint: flows\pipeline_flow.py:stroke_risk_pipeline
+  parameters: {}
+  work_pool:
+    name: local-process-pool
+    work_queue_name:
+    job_variables: {}
+  schedules:
+  - interval: 900.0
+    anchor_date: '2025-06-14T13:04:16.557684+00:00'
+    timezone: UTC
     active: true
+  pull:
+  - prefect.deployments.steps.git_clone:
+      repository: https://github.com/NixonTX/stroke-risk-batcher.git
+      branch: main
+      access_token: '{{ prefect.blocks.secret.deployment-stroke-risk-deployment-stroke-risk-pipeline-repo-token
+        }}'

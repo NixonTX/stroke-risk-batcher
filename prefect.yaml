@@ -17,30 +17,13 @@ pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NixonTX/stroke-risk-batcher.git
     branch: main
-    access_token: '{{ prefect.blocks.secret.deployment-token-refresh-deployment-token-refresh-pipeline-repo-token
-      }}'
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
-- name: token-refresh-deployment
-  version:
-  tags: []
-  description:
-  entrypoint: flows\pipeline_flow.py:token_refresh_pipeline
-  parameters: {}
-  work_pool:
-    name: local-process-pool
-    work_queue_name:
-    job_variables: {}
-  schedules:
-  - interval: 21600.0
-    anchor_date: '2025-06-13T12:37:58.461480+00:00'
-    timezone: UTC
-    active: true
 - name: stroke-risk-deployment
   version:
   tags: []
-  description:
+  description: Deployment for stroke risk prediction pipeline
   entrypoint: flows/pipeline_flow.py:stroke_risk_pipeline
   parameters: {}
   work_pool:
@@ -49,13 +32,13 @@ deployments:
     job_variables: {}
   schedules:
   - cron: '*/15 * * * *'
-    timezone:
+    timezone: UTC
     day_or: true
     active: true
 - name: token-refresh-deployment
   version:
   tags: []
-  description:
+  description: Deployment for Fitbit token refresh pipeline
   entrypoint: flows/pipeline_flow.py:token_refresh_pipeline
   parameters: {}
   work_pool:
@@ -67,7 +50,7 @@ deployments:
     anchor_date: '2025-06-13T12:37:58.461480+00:00'
     timezone: UTC
     active: true
-  - cron: 0 */6 * * *
-    timezone:
+  - cron: '0 */6 * * *'
+    timezone: UTC
     day_or: true
     active: true

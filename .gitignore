@@ -1,6 +1,12 @@
 .env
 
-*.txt
+z_notes_for_dev.txt
 
+logs/
+__pycache__/
 *.pyc
+*.pyo
+*.pyd
+*.db
+*.sqlite
 validate_yaml.py

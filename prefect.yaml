@@ -32,7 +32,13 @@ deployments:
   work_pool:
     name: local-process-pool
     work_queue_name:
-    job_variables: {}
+    job_variables:
+      env:
+        DB_USER: "{{ prefect.blocks.secret.db-user }}"
+        DB_PASSWORD: "{{ prefect.blocks.secret.db-password }}"
+        DB_HOST: "{{ prefect.blocks.secret.db-host }}"
+        DB_PORT: "{{ prefect.blocks.secret.db-port }}"
+        FITBIT_ACCESS_TOKEN: "{{ prefect.blocks.secret.fitbit-access-token }}"
   schedules:
   - cron: '*/15 * * * *'
     timezone: UTC
@@ -47,7 +53,12 @@ deployments:
   work_pool:
     name: local-process-pool
     work_queue_name:
-    job_variables: {}
+    job_variables:
+      env:
+        FITBIT_CLIENT_ID: "{{ prefect.blocks.secret.fitbit-client-id }}"
+        FITBIT_CLIENT_SECRET: "{{ prefect.blocks.secret.fitbit-client-secret }}"
+        FITBIT_TOKEN_URI: "https://api.fitbit.com/oauth2/token"
+        FITBIT_REFRESH_TOKEN: "{{ prefect.blocks.secret.fitbit-refresh-token }}"
   schedules:
   - interval: 21600.0
     anchor_date: '2025-06-13T12:37:58.461480+00:00'

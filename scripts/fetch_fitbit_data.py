@@ -3,22 +3,30 @@ import pandas as pd
 import numpy as np
 from datetime import datetime, timedelta
 from sqlalchemy import create_engine
-from dotenv import load_dotenv
-import os
+from prefect.blocks.system import Secret
+import asyncio
 import time
 
-load_dotenv()
+async def get_secret(name):
+    secret = await Secret.load(name)
+    return secret.get()
 
-# Fitbit API credentials
-access_token = os.getenv("FITBIT_ACCESS_TOKEN")
-headers = {"Authorization": f"Bearer {access_token}"}
-
-# Database connection
-db_url = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/srb_db"
-engine = create_engine(db_url)
+async def get_credentials():
+    return {
+        "access_token": await get_secret("fitbit-access-token"),
+        "db_user": await get_secret("db-user"),
+        "db_password": await get_secret("db-password"),
+        "db_host": await get_secret("db-host"),
+        "db_port": await get_secret("db-port")
+    }
 
 # Fetch Fitbit data
 def fetch_fitbit_data():
+    creds = asyncio.run(get_credentials())
+    headers = {"Authorization": f"Bearer {creds['access_token']}"}
+    db_url = f"postgresql://{creds['db_user']}:{creds['db_password']}@{creds['db_host']}:{creds['db_port']}/srb_db"
+    engine = create_engine(db_url)
+
     now = datetime.now()
     start_time = (now - timedelta(minutes=15)).strftime("%Y-%m-%dT%H:%M:%S")
     end_time = now.strftime("%Y-%m-%dT%H:%M:%S")

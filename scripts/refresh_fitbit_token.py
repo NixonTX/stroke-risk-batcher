@@ -1,35 +1,47 @@
 import requests
-from dotenv import load_dotenv, set_key
-import os
+from prefect.blocks.system import Secret
+import asyncio
 import base64
 
-load_dotenv()
+async def get_secret(name):
+    secret = await Secret.load(name)
+    return secret.get()
 
-client_id = os.getenv("FITBIT_CLIENT_ID")
-client_secret = os.getenv("FITBIT_CLIENT_SECRET")
-token_uri = os.getenv("FITBIT_TOKEN_URI")
-refresh_token = os.getenv("FITBIT_REFRESH_TOKEN")
+async def get_credentials():
+    return {
+        "client_id": await get_secret("fitbit-client-id"),
+        "client_secret": await get_secret("fitbit-client-secret"),
+        "token_uri": "https://api.fitbit.com/oauth2/token",
+        "refresh_token": await get_secret("fitbit-refresh-token")
+    }
 
-if not refresh_token or refresh_token == "your_refresh_tokenX":
-    print("Refresh token missing or invalid in .env. Run get_fitbit_token.py to generate new tokens.")
-    exit(1)
+def refresh_fitbit_token():
+    creds = asyncio.run(get_credentials())
+    if not creds["refresh_token"] or creds["refresh_token"] == "your_refresh_tokenX":
+        print("Refresh token missing or invalid. Run get_fitbit_token.py to generate new tokens.")
+        return
 
-auth_string = f"{client_id}:{client_secret}"
-auth_header = f"Basic {base64.b64encode(auth_string.encode()).decode()}"
+    auth_string = f"{creds['client_id']}:{creds['client_secret']}"
+    auth_header = f"Basic {base64.b64encode(auth_string.encode()).decode()}"
 
-response = requests.post(token_uri, headers={
-    "Authorization": auth_header,
-    "Content-Type": "application/x-www-form-urlencoded"
-}, data={
-    "grant_type": "refresh_token",
-    "refresh_token": refresh_token
-})
+    response = requests.post(creds["token_uri"], headers={
+        "Authorization": auth_header,
+        "Content-Type": "application/x-www-form-urlencoded"
+    }, data={
+        "grant_type": "refresh_token",
+        "refresh_token": creds["refresh_token"]
+    })
 
-token_data = response.json()
-if "access_token" in token_data:
-    set_key(".env", "FITBIT_ACCESS_TOKEN", token_data["access_token"])
-    set_key(".env", "FITBIT_REFRESH_TOKEN", token_data["refresh_token"])
-    print("New access token and refresh token saved to .env")
-else:
-    print("Failed to refresh token:", token_data)
-    print("Run get_fitbit_token.py to re-authenticate.")
+    token_data = response.json()
+    if "access_token" in token_data:
+        async def save_secrets():
+            await Secret(value=token_data["access_token"]).save("fitbit-access-token", overwrite=True)
+            await Secret(value=token_data["refresh_token"]).save("fitbit-refresh-token", overwrite=True)
+        asyncio.run(save_secrets())
+        print("New access token and refresh token saved to Prefect Secret blocks")
+    else:
+        print("Failed to refresh token:", token_data)
+        print("Run get_fitbit_token.py to re-authenticate.")
+
+if __name__ == "__main__":
+    refresh_fitbit_token()

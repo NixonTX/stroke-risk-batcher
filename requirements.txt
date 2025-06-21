@@ -1,3 +1,8 @@
-requests
-pandas
-scikit-learn
+requests>=2.28.1
+pandas>=2.0.0
+numpy>=1.23.0
+scikit-learn>=1.2.0
+sqlalchemy>=2.0.0
+psycopg2-binary>=2.9.0
+python-dotenv>=0.21.0
+prefect>=2.20.0

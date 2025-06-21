@@ -17,6 +17,9 @@ pull:
 - prefect.deployments.steps.git_clone:
     repository: https://github.com/NixonTX/stroke-risk-batcher.git
     branch: main
+- prefect.run_shell_script:
+    commands:
+      - pip install -r requirements.txt
 
 # the deployments section allows you to provide configuration for deploying flows
 deployments:
